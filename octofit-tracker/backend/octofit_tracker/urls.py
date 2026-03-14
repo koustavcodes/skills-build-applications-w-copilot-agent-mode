@@ -17,6 +17,8 @@ from django.contrib import admin
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from .views import UserViewSet, TeamViewSet, ActivityViewSet, WorkoutViewSet, LeaderboardViewSet, api_root
+import os
+from django.http import JsonResponse
 from django.views.generic import RedirectView
 
 router = DefaultRouter()
@@ -31,4 +33,16 @@ urlpatterns = [
     path('api/', api_root, name='api-root'),
     path('api/', include(router.urls)),
     path('', RedirectView.as_view(url='/api/', permanent=True)),
+]
+# Helper to get base API URL
+def get_api_base_url(request):
+    codespace_name = os.environ.get('CODESPACE_NAME')
+    if codespace_name:
+        base_url = f"https://{codespace_name}-8000.app.github.dev/api/"
+    else:
+        base_url = "http://localhost:8000/api/"
+    return JsonResponse({"api_base_url": base_url})
+
+urlpatterns += [
+    path('api/base-url/', get_api_base_url, name='api-base-url'),
 ]
